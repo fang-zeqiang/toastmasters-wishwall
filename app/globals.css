@@ -1,0 +1,661 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0d1220;
+  --foreground: #f7fbff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(149, 240, 200, 0.3);
+  color: #f7fbff;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(149, 240, 200, 0.75);
+  outline-offset: 2px;
+}
+
+.page-shell,
+.control-shell {
+  position: relative;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1.4px)
+      0 0 / 220px 220px,
+    radial-gradient(circle at 78% 36%, rgba(147, 211, 255, 0.08) 0 1px, transparent 1.5px)
+      0 0 / 180px 180px,
+    linear-gradient(180deg, #07111d 0%, #0d1626 44%, #111827 100%);
+}
+
+.page-shell::before,
+.control-shell::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  background:
+    linear-gradient(
+      110deg,
+      transparent 12%,
+      rgba(116, 241, 209, 0.16) 31%,
+      rgba(141, 190, 255, 0.14) 49%,
+      rgba(245, 210, 138, 0.12) 68%,
+      transparent 84%
+    );
+  filter: blur(40px);
+  opacity: 0.95;
+  transform: rotate(-10deg);
+  animation: aurora-sweep 18s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
+  pointer-events: none;
+}
+
+.page-shell::after,
+.control-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 11, 18, 0.08), rgba(5, 11, 18, 0.26)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02), transparent 18%, transparent 82%, rgba(255, 255, 255, 0.02));
+  pointer-events: none;
+}
+
+.screen-shell {
+  --screen-bg-start: oklch(15% 0.026 240);
+  --screen-bg-mid: oklch(19% 0.032 234);
+  --screen-bg-end: oklch(23% 0.038 228);
+  --screen-aurora-a: oklch(87% 0.12 166 / 0.22);
+  --screen-aurora-b: oklch(85% 0.105 236 / 0.18);
+  --screen-aurora-c: oklch(89% 0.07 92 / 0.12);
+  --screen-aurora-blur: 36px;
+  --screen-overlay-top: oklch(6% 0.01 240 / 0.08);
+  --screen-overlay-bottom: oklch(6% 0.01 240 / 0.28);
+  --screen-side-sheen: rgba(255, 255, 255, 0.02);
+  --screen-panel-bg: oklch(18% 0.019 236 / 0.72);
+  --screen-panel-border: oklch(81% 0.05 236 / 0.15);
+  --screen-panel-shadow: 0 28px 70px oklch(6% 0.01 240 / 0.28);
+  --screen-pill-bg: oklch(18% 0.019 236 / 0.55);
+  --screen-bottle-bg: oklch(19% 0.02 236 / 0.54);
+  --screen-bottle-border: oklch(80% 0.045 168 / 0.12);
+  --screen-bottle-shadow: 0 18px 44px oklch(6% 0.01 240 / 0.24);
+  --screen-grid-line: oklch(52% 0.02 236 / 0.09);
+  --screen-footer-fade-mid: oklch(6% 0.01 240 / 0.42);
+  --screen-footer-fade-end: oklch(6% 0.01 240 / 0.82);
+  --screen-accent-strip: linear-gradient(
+    90deg,
+    oklch(87% 0.12 166 / 0.94),
+    oklch(85% 0.105 236 / 0.92) 58%,
+    oklch(89% 0.07 92 / 0.88)
+  );
+  --screen-motion-play-state: running;
+  --screen-motion-base-duration: 44s;
+  --screen-motion-duration-a: 58s;
+  --screen-motion-duration-b: 74s;
+  --screen-motion-duration-c: 90s;
+  --screen-motion-bloom-duration: 26s;
+  --screen-motion-opacity-a: 0.56;
+  --screen-motion-opacity-b: 0.48;
+  --screen-motion-opacity-c: 0.38;
+  --screen-motion-opacity-d: 0.16;
+  --screen-motion-center-opacity: 0.11;
+  --screen-motion-bloom-opacity: 0.15;
+  --screen-motion-blur-a: 104px;
+  --screen-motion-blur-b: 122px;
+  --screen-motion-blur-c: 138px;
+  --screen-motion-saturate: 1.08;
+  --screen-motion-contrast: 1.02;
+  --screen-motion-hue-a: 10deg;
+  --screen-motion-hue-a-neg: -10deg;
+  --screen-motion-hue-b: 14deg;
+  --screen-motion-hue-b-neg: -14deg;
+  --screen-motion-hue-c: 8deg;
+  --screen-motion-hue-c-neg: -8deg;
+  position: relative;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1.4px)
+      0 0 / 220px 220px,
+    radial-gradient(circle at 78% 36%, rgba(147, 211, 255, 0.08) 0 1px, transparent 1.5px)
+      0 0 / 180px 180px,
+    linear-gradient(180deg, var(--screen-bg-start) 0%, var(--screen-bg-mid) 44%, var(--screen-bg-end) 100%);
+}
+
+.screen-shell::before,
+.screen-theme-preview::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  background:
+    linear-gradient(
+      110deg,
+      transparent 12%,
+      var(--screen-aurora-a) 31%,
+      var(--screen-aurora-b) 49%,
+      var(--screen-aurora-c) 68%,
+      transparent 84%
+    );
+  filter: blur(var(--screen-aurora-blur));
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+
+.screen-shell::before {
+  opacity: 0.82;
+  animation: aurora-sweep var(--screen-motion-base-duration) cubic-bezier(0.16, 1, 0.3, 1)
+    infinite alternate;
+  animation-play-state: var(--screen-motion-play-state);
+}
+
+.screen-shell-static::before {
+  opacity: 0.54;
+  animation: none;
+}
+
+.screen-theme-preview::before {
+  opacity: 0.95;
+  animation: aurora-sweep 18s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
+}
+
+.screen-shell::after,
+.screen-theme-preview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, var(--screen-overlay-top), var(--screen-overlay-bottom)),
+    linear-gradient(
+      90deg,
+      var(--screen-side-sheen),
+      transparent 18%,
+      transparent 82%,
+      var(--screen-side-sheen)
+    );
+  pointer-events: none;
+}
+
+.screen-surface {
+  border: 1px solid var(--screen-panel-border);
+  background: var(--screen-panel-bg);
+  backdrop-filter: blur(24px);
+  box-shadow: var(--screen-panel-shadow);
+}
+
+.screen-pill {
+  border: 1px solid var(--screen-panel-border);
+  background: var(--screen-pill-bg);
+}
+
+.screen-theme-trigger {
+  border: 1px solid var(--screen-panel-border);
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--screen-panel-bg) 82%, white 6%), var(--screen-panel-bg)),
+    var(--screen-accent-strip);
+  box-shadow: 0 14px 36px color-mix(in oklab, var(--screen-bg-start) 74%, black 26%);
+  backdrop-filter: blur(20px);
+}
+
+.screen-theme-dock {
+  border: 1px solid var(--screen-panel-border);
+  background: color-mix(in oklab, var(--screen-panel-bg) 88%, black 12%);
+  box-shadow: 0 26px 80px color-mix(in oklab, var(--screen-bg-start) 68%, black 32%);
+  backdrop-filter: blur(26px);
+}
+
+.screen-bottle {
+  overflow: hidden;
+  border: 1px solid var(--screen-bottle-border);
+  background: var(--screen-bottle-bg);
+  backdrop-filter: blur(22px);
+  box-shadow: var(--screen-bottle-shadow);
+  transition:
+    box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wish-bottle-shell {
+  transform: rotate(var(--wish-rotation, 0deg));
+  transform-origin: center center;
+  transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.screen-aurora-stage {
+  inset: -12%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.screen-aurora-band {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  will-change: transform, opacity, filter;
+  animation-play-state: var(--screen-motion-play-state);
+}
+
+.screen-aurora-band--north {
+  top: -16%;
+  left: -10%;
+  width: 92%;
+  height: 42%;
+  background:
+    radial-gradient(circle at 18% 58%, var(--screen-aurora-a) 0, transparent 50%),
+    radial-gradient(circle at 62% 42%, var(--screen-aurora-b) 0, transparent 46%),
+    linear-gradient(108deg, transparent 14%, var(--screen-aurora-c) 44%, transparent 78%);
+  filter: blur(var(--screen-motion-blur-a)) saturate(var(--screen-motion-saturate))
+    contrast(var(--screen-motion-contrast));
+  animation: aurora-ribbon-north var(--screen-motion-duration-a) cubic-bezier(0.37, 0, 0.22, 1)
+    infinite alternate;
+}
+
+.screen-aurora-band--west {
+  top: 12%;
+  left: -22%;
+  width: 46%;
+  height: 74%;
+  background:
+    radial-gradient(circle at 56% 34%, var(--screen-aurora-a) 0, transparent 44%),
+    radial-gradient(circle at 62% 70%, var(--screen-aurora-b) 0, transparent 48%),
+    linear-gradient(164deg, transparent 16%, var(--screen-aurora-c) 58%, transparent 86%);
+  filter: blur(var(--screen-motion-blur-b)) saturate(calc(var(--screen-motion-saturate) * 1.02))
+    contrast(var(--screen-motion-contrast));
+  animation: aurora-ribbon-west var(--screen-motion-duration-b) cubic-bezier(0.37, 0, 0.22, 1)
+    infinite alternate;
+}
+
+.screen-aurora-band--east {
+  top: 2%;
+  right: -18%;
+  width: 44%;
+  height: 72%;
+  background:
+    radial-gradient(circle at 28% 38%, var(--screen-aurora-b) 0, transparent 42%),
+    radial-gradient(circle at 36% 66%, var(--screen-aurora-c) 0, transparent 50%),
+    linear-gradient(198deg, transparent 10%, var(--screen-aurora-a) 48%, transparent 84%);
+  filter: blur(var(--screen-motion-blur-b)) saturate(calc(var(--screen-motion-saturate) * 1.05))
+    contrast(var(--screen-motion-contrast));
+  animation: aurora-ribbon-east var(--screen-motion-duration-c) cubic-bezier(0.37, 0, 0.22, 1)
+    infinite alternate;
+}
+
+.screen-aurora-band--veil {
+  top: 14%;
+  left: 12%;
+  width: 76%;
+  height: 58%;
+  background:
+    radial-gradient(
+      circle at 34% 52%,
+      color-mix(in oklab, var(--screen-aurora-b) 82%, white 18%) 0,
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 68% 42%,
+      color-mix(in oklab, var(--screen-aurora-c) 80%, white 20%) 0,
+      transparent 46%
+    ),
+    linear-gradient(
+      118deg,
+      transparent 16%,
+      color-mix(in oklab, var(--screen-aurora-a) 82%, white 18%) 46%,
+      transparent 82%
+    );
+  filter: blur(calc(var(--screen-motion-blur-a) * 0.88))
+    saturate(calc(var(--screen-motion-saturate) * 1.18))
+    contrast(var(--screen-motion-contrast));
+  animation: aurora-ribbon-veil var(--screen-motion-duration-b) cubic-bezier(0.37, 0, 0.22, 1)
+    infinite alternate;
+}
+
+.screen-aurora-band--floor {
+  left: 18%;
+  right: 8%;
+  bottom: -22%;
+  height: 34%;
+  background:
+    radial-gradient(circle at 50% 28%, var(--screen-aurora-a) 0, transparent 44%),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--screen-aurora-b) 84%, white 16%) 36%,
+      color-mix(in oklab, var(--screen-aurora-c) 82%, white 18%) 62%,
+      transparent 100%
+    );
+  filter: blur(var(--screen-motion-blur-c)) saturate(var(--screen-motion-saturate))
+    contrast(var(--screen-motion-contrast));
+  animation: aurora-ribbon-floor var(--screen-motion-duration-b) cubic-bezier(0.37, 0, 0.22, 1)
+    infinite alternate;
+}
+
+.screen-aurora-bloom {
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 50% 46%,
+      color-mix(in oklab, var(--screen-aurora-b) 68%, white 32%) 0,
+      transparent 30%
+    ),
+    radial-gradient(circle at 24% 70%, var(--screen-aurora-a) 0, transparent 34%),
+    radial-gradient(circle at 76% 24%, var(--screen-aurora-c) 0, transparent 30%);
+  filter: blur(76px) saturate(calc(var(--screen-motion-saturate) * 1.2));
+  mix-blend-mode: screen;
+  opacity: var(--screen-motion-bloom-opacity);
+  will-change: transform, opacity, filter;
+  animation: aurora-stage-breathe var(--screen-motion-bloom-duration) ease-in-out infinite;
+  animation-play-state: var(--screen-motion-play-state);
+}
+
+.screen-arrival-pulse {
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 44%, color-mix(in oklab, var(--screen-aurora-a) 62%, white 38%) 0, transparent 34%),
+    linear-gradient(
+      90deg,
+      transparent 14%,
+      color-mix(in oklab, var(--screen-aurora-b) 74%, white 26%) 44%,
+      color-mix(in oklab, var(--screen-aurora-c) 70%, white 30%) 56%,
+      transparent 86%
+    );
+  filter: blur(82px) saturate(1.12);
+  mix-blend-mode: screen;
+  animation: screen-arrival-pulse 1400ms cubic-bezier(0.16, 1, 0.3, 1) 1 both;
+}
+
+.surface-panel {
+  border: 1px solid rgba(187, 213, 255, 0.16);
+  background: rgba(9, 16, 29, 0.7);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 26px 70px rgba(2, 7, 18, 0.26);
+}
+
+.screen-grid {
+  background-image:
+    linear-gradient(var(--screen-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--screen-grid-line) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.25), black 20%, black 80%, rgba(0, 0, 0, 0.15));
+}
+
+.wish-bottle {
+  animation: bottle-drift var(--wish-duration, 17s) cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  animation-delay: var(--wish-delay, 0s);
+}
+
+.wish-bottle-shell:hover {
+  z-index: 24;
+  transform: translate3d(0, -18px, 0) rotate(0deg) scale(1.1);
+}
+
+.wish-bottle-shell:hover .screen-bottle {
+  border-color: color-mix(in oklab, var(--screen-bottle-border) 58%, white 42%);
+  background: color-mix(in oklab, var(--screen-bottle-bg) 90%, white 10%);
+  box-shadow:
+    0 28px 60px color-mix(in oklab, var(--screen-bg-start) 54%, black 46%),
+    0 0 0 1px color-mix(in oklab, var(--screen-bottle-border) 45%, white 55%);
+}
+
+.screen-footer-fade {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0),
+    var(--screen-footer-fade-mid) 40%,
+    var(--screen-footer-fade-end)
+  );
+}
+
+@keyframes aurora-sweep {
+  0% {
+    transform: translate3d(-7%, -2%, 0) rotate(-12deg) scale(0.98);
+    filter: blur(var(--screen-aurora-blur))
+      saturate(calc(var(--screen-motion-saturate, 1) * 0.96))
+      hue-rotate(var(--screen-motion-hue-a-neg, 0deg));
+  }
+  42% {
+    transform: translate3d(2%, 3%, 0) rotate(-6deg) scale(1.05);
+    filter: blur(var(--screen-aurora-blur))
+      saturate(calc(var(--screen-motion-saturate, 1) * 1.18))
+      hue-rotate(8deg);
+  }
+  100% {
+    transform: translate3d(9%, 5%, 0) rotate(-2deg) scale(1.1);
+    filter: blur(var(--screen-aurora-blur))
+      saturate(calc(var(--screen-motion-saturate, 1) * 1.08))
+      hue-rotate(var(--screen-motion-hue-a, 0deg));
+  }
+}
+
+@keyframes aurora-ribbon-north {
+  0% {
+    transform: translate3d(-8%, -4%, 0) rotate(-8deg) scale(1.02);
+    opacity: calc(var(--screen-motion-opacity-a) * 0.9);
+    filter: blur(var(--screen-motion-blur-a))
+      saturate(calc(var(--screen-motion-saturate) * 0.98))
+      contrast(var(--screen-motion-contrast))
+      hue-rotate(var(--screen-motion-hue-a-neg));
+  }
+  45% {
+    transform: translate3d(2%, 4%, 0) rotate(-3deg) scale(1.1);
+    opacity: var(--screen-motion-opacity-a);
+    filter: blur(calc(var(--screen-motion-blur-a) * 0.94))
+      saturate(calc(var(--screen-motion-saturate) * 1.18))
+      contrast(calc(var(--screen-motion-contrast) * 1.02))
+      hue-rotate(0deg);
+  }
+  100% {
+    transform: translate3d(10%, -1%, 0) rotate(-5deg) scale(1.14);
+    opacity: calc(var(--screen-motion-opacity-a) * 0.84);
+    filter: blur(calc(var(--screen-motion-blur-a) * 1.02))
+      saturate(calc(var(--screen-motion-saturate) * 1.1))
+      contrast(var(--screen-motion-contrast))
+      hue-rotate(var(--screen-motion-hue-a));
+  }
+}
+
+@keyframes aurora-ribbon-west {
+  0% {
+    transform: translate3d(-6%, 0, 0) rotate(15deg) scale(0.96);
+    opacity: calc(var(--screen-motion-opacity-b) * 0.86);
+    filter: blur(var(--screen-motion-blur-b))
+      saturate(calc(var(--screen-motion-saturate) * 0.96))
+      contrast(var(--screen-motion-contrast))
+      hue-rotate(var(--screen-motion-hue-b-neg));
+  }
+  50% {
+    transform: translate3d(8%, 6%, 0) rotate(10deg) scale(1.08);
+    opacity: var(--screen-motion-opacity-b);
+    filter: blur(calc(var(--screen-motion-blur-b) * 0.92))
+      saturate(calc(var(--screen-motion-saturate) * 1.16))
+      contrast(calc(var(--screen-motion-contrast) * 1.03))
+      hue-rotate(4deg);
+  }
+  100% {
+    transform: translate3d(14%, -3%, 0) rotate(18deg) scale(1.14);
+    opacity: calc(var(--screen-motion-opacity-b) * 0.76);
+    filter: blur(calc(var(--screen-motion-blur-b) * 1.04))
+      saturate(calc(var(--screen-motion-saturate) * 1.08))
+      contrast(var(--screen-motion-contrast))
+      hue-rotate(var(--screen-motion-hue-b));
+  }
+}
+
+@keyframes aurora-ribbon-east {
+  0% {
+    transform: translate3d(6%, -2%, 0) rotate(-14deg) scale(0.98);
+    opacity: calc(var(--screen-motion-opacity-c) * 0.82);
+    filter: blur(var(--screen-motion-blur-b))
+      saturate(calc(var(--screen-motion-saturate) * 0.94))
+      contrast(var(--screen-motion-contrast))
+      hue-rotate(var(--screen-motion-hue-c-neg));
+  }
+  42% {
+    transform: translate3d(-8%, 5%, 0) rotate(-8deg) scale(1.08);
+    opacity: var(--screen-motion-opacity-c);
+    filter: blur(calc(var(--screen-motion-blur-b) * 0.9))
+      saturate(calc(var(--screen-motion-saturate) * 1.18))
+      contrast(calc(var(--screen-motion-contrast) * 1.04))
+      hue-rotate(8deg);
+  }
+  100% {
+    transform: translate3d(-14%, 1%, 0) rotate(-18deg) scale(1.16);
+    opacity: calc(var(--screen-motion-opacity-c) * 0.74);
+    filter: blur(calc(var(--screen-motion-blur-b) * 1.03))
+      saturate(calc(var(--screen-motion-saturate) * 1.08))
+      contrast(var(--screen-motion-contrast))
+      hue-rotate(var(--screen-motion-hue-c));
+  }
+}
+
+@keyframes aurora-ribbon-veil {
+  0% {
+    transform: translate3d(-6%, 3%, 0) rotate(-5deg) scale(0.94);
+    opacity: calc(var(--screen-motion-center-opacity) * 0.7);
+    filter: blur(calc(var(--screen-motion-blur-a) * 0.92))
+      saturate(calc(var(--screen-motion-saturate) * 1.06))
+      contrast(var(--screen-motion-contrast))
+      hue-rotate(var(--screen-motion-hue-b-neg));
+  }
+  50% {
+    transform: translate3d(6%, -4%, 0) rotate(2deg) scale(1.16);
+    opacity: var(--screen-motion-center-opacity);
+    filter: blur(calc(var(--screen-motion-blur-a) * 0.78))
+      saturate(calc(var(--screen-motion-saturate) * 1.3))
+      contrast(calc(var(--screen-motion-contrast) * 1.06))
+      hue-rotate(12deg);
+  }
+  100% {
+    transform: translate3d(11%, 5%, 0) rotate(6deg) scale(1.22);
+    opacity: calc(var(--screen-motion-center-opacity) * 0.86);
+    filter: blur(calc(var(--screen-motion-blur-a) * 0.9))
+      saturate(calc(var(--screen-motion-saturate) * 1.16))
+      contrast(var(--screen-motion-contrast))
+      hue-rotate(var(--screen-motion-hue-a));
+  }
+}
+
+@keyframes aurora-ribbon-floor {
+  0% {
+    transform: translate3d(-4%, 6%, 0) rotate(-2deg) scale(0.98);
+    opacity: calc(var(--screen-motion-opacity-d) * 0.9);
+    filter: blur(var(--screen-motion-blur-c))
+      saturate(calc(var(--screen-motion-saturate) * 0.96))
+      contrast(var(--screen-motion-contrast))
+      hue-rotate(var(--screen-motion-hue-a-neg));
+  }
+  55% {
+    transform: translate3d(4%, -2%, 0) rotate(1deg) scale(1.06);
+    opacity: calc(var(--screen-motion-opacity-d) + 0.08);
+    filter: blur(calc(var(--screen-motion-blur-c) * 0.94))
+      saturate(calc(var(--screen-motion-saturate) * 1.18))
+      contrast(calc(var(--screen-motion-contrast) * 1.02))
+      hue-rotate(0deg);
+  }
+  100% {
+    transform: translate3d(10%, 4%, 0) rotate(3deg) scale(1.12);
+    opacity: calc(var(--screen-motion-opacity-d) * 0.78);
+    filter: blur(calc(var(--screen-motion-blur-c) * 1.02))
+      saturate(calc(var(--screen-motion-saturate) * 1.1))
+      contrast(var(--screen-motion-contrast))
+      hue-rotate(var(--screen-motion-hue-c));
+  }
+}
+
+@keyframes aurora-stage-breathe {
+  0% {
+    opacity: calc(var(--screen-motion-bloom-opacity) * 0.54);
+    transform: scale(0.92);
+    filter: blur(82px)
+      saturate(calc(var(--screen-motion-saturate) * 0.94))
+      hue-rotate(var(--screen-motion-hue-c-neg));
+  }
+  46% {
+    opacity: var(--screen-motion-bloom-opacity);
+    transform: scale(1.08);
+    filter: blur(72px)
+      saturate(calc(var(--screen-motion-saturate) * 1.26))
+      hue-rotate(14deg);
+  }
+  100% {
+    opacity: calc(var(--screen-motion-bloom-opacity) * 0.74);
+    transform: scale(1.14);
+    filter: blur(86px)
+      saturate(calc(var(--screen-motion-saturate) * 1.08))
+      hue-rotate(var(--screen-motion-hue-b));
+  }
+}
+
+@keyframes screen-arrival-pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  28% {
+    opacity: 0.34;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes bottle-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  30% {
+    transform: translate3d(0, -10px, 0);
+  }
+  65% {
+    transform: translate3d(0, 14px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-shell::before,
+  .control-shell::before,
+  .screen-shell::before,
+  .screen-theme-preview::before,
+  .screen-aurora-band,
+  .screen-aurora-bloom,
+  .screen-arrival-pulse,
+  .wish-bottle {
+    animation: none;
+  }
+
+  .wish-bottle-shell {
+    transition: none;
+  }
+}
+
+@media (hover: none) {
+  .wish-bottle-shell:hover {
+    transform: rotate(var(--wish-rotation, 0deg));
+  }
+}
