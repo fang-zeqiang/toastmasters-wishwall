@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Serif_SC } from "next/font/google";
 
 import { ScreenThemeProvider } from "@/components/screen-theme-provider";
 
@@ -15,6 +15,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const sourceHanSerif = Noto_Serif_SC({
+  variable: "--font-source-han-serif",
+  weight: ["600", "700"],
+  display: "swap",
+  preload: false,
+});
+
 export const metadata: Metadata = {
   title: "Toastmasters 三周年电子许愿墙",
   description: "提交页、管理页与大屏展示页本地前端原型",
@@ -28,7 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${sourceHanSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ScreenThemeProvider>{children}</ScreenThemeProvider>

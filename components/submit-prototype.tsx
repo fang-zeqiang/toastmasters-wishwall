@@ -12,6 +12,10 @@ import {
 } from "lucide-react";
 
 import {
+  AnniversaryBadgeModal,
+  type EarnedAnniversaryBadge,
+} from "@/components/anniversary-badge";
+import {
   buildClientDeviceId,
   countText,
   deriveDisplayName,
@@ -27,20 +31,8 @@ type SubmitPrototypeProps = {
 type BannerTone = "success" | "warning" | "info";
 
 const DEVICE_STORAGE_KEY = "wishwall_device_id";
-const FETCH_TIMEOUT_MS = 15_000;
 const MOCK_WISH =
   "希望明年能把英文主持练稳，也把更多掌声和勇气送给台上的每个人。";
-
-async function fetchWithTimeout(input: string, init: RequestInit = {}, timeoutMs = FETCH_TIMEOUT_MS) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    return await fetch(input, { ...init, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
-}
 
 export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
   const liveMode = !compact;
@@ -54,12 +46,16 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
   const [configured, setConfigured] = useState(!liveMode);
   const [message, setMessage] = useState("");
   const [bannerTone, setBannerTone] = useState<BannerTone>("info");
+  const [earnedBadge, setEarnedBadge] = useState<EarnedAnniversaryBadge | null>(
+    null
+  );
 
   const nicknameCount = countText(nickname);
   const wishCount = countText(wishText);
   const remaining = MAX_WISH_LENGTH - wishCount;
   const displayName = deriveDisplayName(nickname, anonymous) || "你的昵称";
   const submissionsLeft = Math.max(0, MAX_DEVICE_SUBMITS - usedCount);
+  const submitLabel = liveMode && !configured ? "预览徽章" : "投递愿望";
 
   const canSubmit = useMemo(() => {
     return (
@@ -105,15 +101,33 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
     }
 
     if (!liveMode) {
-      setUsedCount((current) => current + 1);
+      const nextUsedCount = usedCount + 1;
+
+      setUsedCount(nextUsedCount);
       setBannerTone("success");
       setMessage("已进入审核池，审核通过后将在大屏出现。");
+      setEarnedBadge(
+        buildEarnedBadge({
+          nickname,
+          anonymous,
+          wishText,
+          usedCount: nextUsedCount,
+        })
+      );
       return;
     }
 
     if (!configured) {
       setBannerTone("warning");
-      setMessage("飞书后端尚未配置完成。");
+      setMessage("飞书后端尚未配置完成，当前只预览徽章，不会写入审核池。");
+      setEarnedBadge(
+        buildEarnedBadge({
+          nickname,
+          anonymous,
+          wishText,
+          usedCount: usedCount + 1,
+        })
+      );
       return;
     }
 
@@ -121,7 +135,7 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
     setMessage("");
 
     try {
-      const response = await fetchWithTimeout("/api/wishes", {
+      const response = await fetch("/api/wishes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -135,6 +149,10 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
       });
       const payload = (await response.json()) as {
         message?: string;
+        record?: {
+          id?: string;
+          displayName?: string;
+        };
         usedCount?: number;
       };
 
@@ -142,14 +160,25 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
         throw new Error(payload.message || "提交失败，请稍后再试。");
       }
 
-      setUsedCount(payload.usedCount ?? usedCount + 1);
+      const nextUsedCount = payload.usedCount ?? usedCount + 1;
+
+      setUsedCount(nextUsedCount);
+      setEarnedBadge(
+        buildEarnedBadge({
+          recordId: payload.record?.id,
+          nickname,
+          anonymous,
+          wishText,
+          usedCount: nextUsedCount,
+        })
+      );
       setWishText("");
       setAnonymous(false);
       setBannerTone("success");
       setMessage(payload.message || "已进入审核池，审核通过后将在大屏出现。");
     } catch (error) {
       setBannerTone("warning");
-      setMessage(formatFetchError(error, "提交失败，请稍后再试。"));
+      setMessage(error instanceof Error ? error.message : "提交失败，请稍后再试。");
     } finally {
       setSubmitting(false);
     }
@@ -301,7 +330,7 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
               ) : (
                 <Sparkles className="size-4" />
               )}
-              {submitting ? "提交中..." : "投递愿望"}
+              {submitting ? "提交中..." : submitLabel}
             </button>
 
             <div className="flex items-center justify-between text-xs text-white/58">
@@ -322,6 +351,14 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
           </div>
         </main>
       </div>
+
+      {earnedBadge ? (
+        <AnniversaryBadgeModal
+          badge={earnedBadge}
+          contained={compact}
+          onClose={() => setEarnedBadge(null)}
+        />
+      ) : null}
     </div>
   );
 
@@ -329,7 +366,7 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
     setSyncing(true);
 
     try {
-      const response = await fetchWithTimeout(
+      const response = await fetch(
         `/api/public/meta?deviceId=${encodeURIComponent(nextDeviceId)}`,
         {
           cache: "no-store",
@@ -350,23 +387,13 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
     } catch (error) {
       setConfigured(false);
       setBannerTone("warning");
-      setMessage(formatFetchError(error, "读取设备提交次数失败。"));
+      setMessage(
+        error instanceof Error ? error.message : "读取设备提交次数失败。"
+      );
     } finally {
       setSyncing(false);
     }
   }
-}
-
-function formatFetchError(error: unknown, fallback: string) {
-  if (error instanceof DOMException && error.name === "AbortError") {
-    return "连接服务器超时。若在中国大陆，访问国际站点可能不稳定，请尝试更换网络、关闭代理冲突，或稍后再试。";
-  }
-
-  if (error instanceof Error && error.name === "AbortError") {
-    return "连接服务器超时。若在中国大陆，访问国际站点可能不稳定，请尝试更换网络、关闭代理冲突，或稍后再试。";
-  }
-
-  return error instanceof Error ? error.message : fallback;
 }
 
 function getOrCreateDeviceId() {
@@ -379,4 +406,32 @@ function getOrCreateDeviceId() {
   const next = buildClientDeviceId();
   window.localStorage.setItem(DEVICE_STORAGE_KEY, next);
   return next;
+}
+
+function buildEarnedBadge({
+  recordId,
+  nickname,
+  anonymous,
+  wishText,
+  usedCount,
+}: {
+  recordId?: string;
+  nickname: string;
+  anonymous: boolean;
+  wishText: string;
+  usedCount: number;
+}): EarnedAnniversaryBadge {
+  return {
+    id: buildBadgeId(recordId, usedCount),
+    nickname: nickname.trim(),
+    displayName: deriveDisplayName(nickname, anonymous),
+    wishExcerpt: wishText.trim(),
+  };
+}
+
+function buildBadgeId(recordId: string | undefined, usedCount: number) {
+  const seed = recordId || `${Date.now().toString(36)}${usedCount}`;
+  const suffix = seed.replace(/[^a-z0-9]/gi, "").slice(-5).toUpperCase();
+
+  return `TM3-${String(usedCount).padStart(2, "0")}-${suffix.padStart(5, "0")}`;
 }
