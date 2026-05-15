@@ -711,6 +711,10 @@ textarea {
 }
 
 .anniversary-badge-stage {
+  --badge-rx: 0deg;
+  --badge-ry: 0deg;
+  --badge-shine-x: 50%;
+  --badge-shine-y: 38%;
   --badge-size: min(74vw, 312px);
   height: var(--badge-size);
   perspective: 1200px;
@@ -733,19 +737,19 @@ textarea {
 }
 
 .anniversary-badge-card {
-  animation: badge-arrive 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: badge-arrive 980ms cubic-bezier(0.16, 1, 0.3, 1) both;
   display: block;
   height: 100%;
   position: relative;
   transform: rotateX(var(--badge-rx)) rotateY(var(--badge-ry)) scale(var(--badge-scale));
   transform-style: preserve-3d;
-  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
   width: 100%;
   will-change: transform;
 }
 
 .anniversary-badge-token:hover .anniversary-badge-card {
-  transition-duration: 90ms;
+  transition-duration: 160ms;
 }
 
 .anniversary-badge-face {
@@ -761,9 +765,9 @@ textarea {
   position: absolute;
   transform-style: preserve-3d;
   transition:
-    opacity 180ms ease,
-    transform 520ms cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 180ms ease;
+    opacity 300ms ease,
+    transform 920ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    visibility 300ms ease;
 }
 
 .anniversary-badge-face--front {
@@ -797,6 +801,19 @@ textarea {
   transform: scale(1.005);
   user-select: none;
   width: 100%;
+}
+
+.anniversary-badge-image-loading {
+  align-items: center;
+  background: radial-gradient(circle at 50% 45%, rgba(12, 36, 62, 0.28), rgba(5, 13, 23, 0.72));
+  color: rgba(223, 247, 255, 0.82);
+  display: inline-flex;
+  font-size: 12px;
+  inset: 0;
+  justify-content: center;
+  letter-spacing: 0.12em;
+  position: absolute;
+  text-transform: uppercase;
 }
 
 .anniversary-badge-glass {

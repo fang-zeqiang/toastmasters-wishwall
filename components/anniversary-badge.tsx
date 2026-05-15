@@ -3,6 +3,8 @@
 import {
   type CSSProperties,
   type PointerEvent,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 import Image from "next/image";
@@ -13,6 +15,7 @@ export type EarnedAnniversaryBadge = {
   nickname: string;
   displayName: string;
   wishExcerpt: string;
+  pending?: boolean;
 };
 
 type AnniversaryBadgeModalProps = {
@@ -28,16 +31,40 @@ export function AnniversaryBadgeModal({
 }: AnniversaryBadgeModalProps) {
   const [flipped, setFlipped] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [tilt, setTilt] = useState({ x: 0, y: 0, shineX: 50, shineY: 38 });
+  const [readyBadgeId, setReadyBadgeId] = useState<string | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const tiltRef = useRef({ x: 0, y: 0, shineX: 50, shineY: 38 });
+  const frontImageReady = readyBadgeId === badge.id;
 
   const style =
     {
-      "--badge-rx": `${tilt.x}deg`,
-      "--badge-ry": `${tilt.y}deg`,
-      "--badge-shine-x": `${tilt.shineX}%`,
-      "--badge-shine-y": `${tilt.shineY}%`,
       "--badge-scale": expanded ? 1.1 : 1,
     } as CSSProperties;
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
+
+  const applyTilt = () => {
+    rafRef.current = null;
+    const stage = stageRef.current;
+
+    if (!stage) {
+      return;
+    }
+
+    const nextTilt = tiltRef.current;
+
+    stage.style.setProperty("--badge-rx", `${nextTilt.x}deg`);
+    stage.style.setProperty("--badge-ry", `${nextTilt.y}deg`);
+    stage.style.setProperty("--badge-shine-x", `${nextTilt.shineX}%`);
+    stage.style.setProperty("--badge-shine-y", `${nextTilt.shineY}%`);
+  };
 
   const handlePointerMove = (event: PointerEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -46,16 +73,24 @@ export function AnniversaryBadgeModal({
     const rotateY = (x - 0.5) * 20;
     const rotateX = (0.5 - y) * 18;
 
-    setTilt({
+    tiltRef.current = {
       x: Number(rotateX.toFixed(2)),
       y: Number(rotateY.toFixed(2)),
       shineX: Math.round(x * 100),
       shineY: Math.round(y * 100),
-    });
+    };
+
+    if (rafRef.current === null) {
+      rafRef.current = requestAnimationFrame(applyTilt);
+    }
   };
 
   const resetTilt = () => {
-    setTilt({ x: 0, y: 0, shineX: 50, shineY: 38 });
+    tiltRef.current = { x: 0, y: 0, shineX: 50, shineY: 38 };
+
+    if (rafRef.current === null) {
+      rafRef.current = requestAnimationFrame(applyTilt);
+    }
   };
 
   return (
@@ -92,7 +127,9 @@ export function AnniversaryBadgeModal({
               三周年纪念徽章已点亮
             </h2>
             <p className="mt-2 text-sm leading-6 text-white/68">
-              愿望已进入审核池，通过后会飞向会场大屏。
+              {badge.pending
+                ? "正在写入审核池，徽章已提前为你点亮。"
+                : "愿望已进入审核池，通过后会飞向会场大屏。"}
             </p>
           </div>
           <button
@@ -107,6 +144,7 @@ export function AnniversaryBadgeModal({
 
         <div className="anniversary-badge-display relative z-10 mt-5 flex justify-center">
           <div
+            ref={stageRef}
             className={`anniversary-badge-stage ${
               expanded ? "anniversary-badge-stage--expanded" : ""
             } ${flipped ? "anniversary-badge-stage--flipped" : ""}`}
@@ -123,15 +161,22 @@ export function AnniversaryBadgeModal({
               <span className="anniversary-badge-card">
                 <span className="anniversary-badge-face anniversary-badge-face--front">
                   <Image
-                    src="/badge/anniversary-3-disc.png"
+                    src="/badge/anniversary-3-disc.jpg"
                     alt="三周年纪念徽章正面"
                     width={1254}
                     height={1254}
                     sizes="(max-width: 640px) 74vw, 382px"
+                    quality={78}
                     priority
+                    onLoad={() => setReadyBadgeId(badge.id)}
                     className="anniversary-badge-image"
                     draggable={false}
                   />
+                  {!frontImageReady ? (
+                    <span className="anniversary-badge-image-loading">
+                      徽章铸造中...
+                    </span>
+                  ) : null}
                   <span className="anniversary-badge-glass" />
                   <span className="anniversary-badge-spark anniversary-badge-spark--one" />
                   <span className="anniversary-badge-spark anniversary-badge-spark--two" />

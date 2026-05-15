@@ -31,8 +31,24 @@ type SubmitPrototypeProps = {
 type BannerTone = "success" | "warning" | "info";
 
 const DEVICE_STORAGE_KEY = "wishwall_device_id";
+const FETCH_TIMEOUT_MS = 15_000;
 const MOCK_WISH =
   "希望明年能把英文主持练稳，也把更多掌声和勇气送给台上的每个人。";
+
+async function fetchWithTimeout(
+  input: string,
+  init: RequestInit = {},
+  timeoutMs = FETCH_TIMEOUT_MS
+) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
   const liveMode = !compact;
@@ -132,10 +148,21 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
     }
 
     setSubmitting(true);
-    setMessage("");
+    setBannerTone("info");
+    setMessage("愿望正在送往审核池，先为你点亮纪念徽章...");
+    const pendingUsedCount = usedCount + 1;
+    setEarnedBadge(
+      buildEarnedBadge({
+        nickname,
+        anonymous,
+        wishText,
+        usedCount: pendingUsedCount,
+        pending: true,
+      })
+    );
 
     try {
-      const response = await fetch("/api/wishes", {
+      const response = await fetchWithTimeout("/api/wishes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -160,7 +187,7 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
         throw new Error(payload.message || "提交失败，请稍后再试。");
       }
 
-      const nextUsedCount = payload.usedCount ?? usedCount + 1;
+      const nextUsedCount = payload.usedCount ?? pendingUsedCount;
 
       setUsedCount(nextUsedCount);
       setEarnedBadge(
@@ -170,6 +197,7 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
           anonymous,
           wishText,
           usedCount: nextUsedCount,
+          pending: false,
         })
       );
       setWishText("");
@@ -177,8 +205,9 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
       setBannerTone("success");
       setMessage(payload.message || "已进入审核池，审核通过后将在大屏出现。");
     } catch (error) {
+      setEarnedBadge(null);
       setBannerTone("warning");
-      setMessage(error instanceof Error ? error.message : "提交失败，请稍后再试。");
+      setMessage(formatFetchError(error, "提交失败，请稍后再试。"));
     } finally {
       setSubmitting(false);
     }
@@ -366,7 +395,7 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
     setSyncing(true);
 
     try {
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `/api/public/meta?deviceId=${encodeURIComponent(nextDeviceId)}`,
         {
           cache: "no-store",
@@ -387,13 +416,22 @@ export function SubmitPrototype({ compact = false }: SubmitPrototypeProps) {
     } catch (error) {
       setConfigured(false);
       setBannerTone("warning");
-      setMessage(
-        error instanceof Error ? error.message : "读取设备提交次数失败。"
-      );
+      setMessage(formatFetchError(error, "读取设备提交次数失败。"));
     } finally {
       setSyncing(false);
     }
   }
+}
+
+function formatFetchError(error: unknown, fallback: string) {
+  if (
+    (error instanceof DOMException && error.name === "AbortError") ||
+    (error instanceof Error && error.name === "AbortError")
+  ) {
+    return "网络连接超时。可先重试一次，或切换更稳定网络后再提交。";
+  }
+
+  return error instanceof Error ? error.message : fallback;
 }
 
 function getOrCreateDeviceId() {
@@ -420,12 +458,14 @@ function buildEarnedBadge({
   anonymous: boolean;
   wishText: string;
   usedCount: number;
+  pending?: boolean;
 }): EarnedAnniversaryBadge {
   return {
     id: buildBadgeId(recordId, usedCount),
     nickname: nickname.trim(),
     displayName: deriveDisplayName(nickname, anonymous),
     wishExcerpt: wishText.trim(),
+    pending,
   };
 }
 
