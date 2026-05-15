@@ -452,6 +452,7 @@ function buildEarnedBadge({
   anonymous,
   wishText,
   usedCount,
+  pending,
 }: {
   recordId?: string;
   nickname: string;
